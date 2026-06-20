@@ -54,6 +54,32 @@ public class InterviewController {
         }
     }
 
+    @PostMapping("/{id}/complete")
+    public Result<Interview> completeInterview(@PathVariable Long id) {
+        try {
+            Interview interview = interviewService.completeInterview(id);
+            if (interview == null) {
+                return Result.error(404, "面试安排不存在");
+            }
+            return Result.success("面试已完成", interview);
+        } catch (IllegalStateException e) {
+            return Result.error(400, e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/cancel")
+    public Result<Interview> cancelInterview(@PathVariable Long id) {
+        try {
+            Interview interview = interviewService.cancelInterview(id);
+            if (interview == null) {
+                return Result.error(404, "面试安排不存在");
+            }
+            return Result.success("面试已取消", interview);
+        } catch (IllegalStateException e) {
+            return Result.error(400, e.getMessage());
+        }
+    }
+
     @GetMapping("/candidate/{candidateId}")
     public Result<List<Interview>> listByCandidate(@PathVariable Long candidateId) {
         return Result.success(interviewService.listInterviewsByCandidate(candidateId));

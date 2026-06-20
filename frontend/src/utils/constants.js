@@ -20,6 +20,12 @@ export const INTERVIEW_METHOD_MAP = {
   PHONE: { label: '电话面试', type: 'success' }
 }
 
+export const INTERVIEW_STATUS_MAP = {
+  SCHEDULED: { label: '待面试', type: 'primary' },
+  COMPLETED: { label: '已完成', type: 'success' },
+  CANCELLED: { label: '已取消', type: 'info' }
+}
+
 export function formatStatus(status, map) {
   const item = map[status]
   return item ? item.label : status

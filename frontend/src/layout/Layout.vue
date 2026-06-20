@@ -37,9 +37,9 @@
 
       <el-main class="main-content">
         <router-view v-slot="{ Component }">
-          <transition name="fade" mode="out-in">
+          <keep-alive include="Dashboard">
             <component :is="Component" />
-          </transition>
+          </keep-alive>
         </router-view>
       </el-main>
     </el-container>
@@ -137,15 +137,5 @@ const currentTitle = computed(() => route.meta.title || '')
   padding: 0;
   overflow: auto;
   background-color: #f5f7fa;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
 }
 </style>

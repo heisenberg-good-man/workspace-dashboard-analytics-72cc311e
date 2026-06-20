@@ -32,6 +32,10 @@ const routes = [
         meta: { title: '面试安排', icon: 'Calendar' }
       }
     ]
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/dashboard'
   }
 ]
 

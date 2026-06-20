@@ -1,29 +1,31 @@
-import request from '@/utils/request'
+import request, { withMock } from '@/utils/request'
+import { API } from '@/utils/apiConfig'
+import { getMockJobs, getMockOpenJobs, getMockCandidates } from '@/utils/mockData'
 
 export function listJobs() {
-  return request({
-    url: '/api/jobs',
-    method: 'get'
-  })
+  return withMock(
+    () => request({ url: API.JOBS, method: 'get' }),
+    getMockJobs
+  )
 }
 
 export function listOpenJobs() {
-  return request({
-    url: '/api/jobs/open',
-    method: 'get'
-  })
+  return withMock(
+    () => request({ url: API.JOBS_OPEN, method: 'get' }),
+    getMockOpenJobs
+  )
 }
 
 export function getJob(id) {
   return request({
-    url: `/api/jobs/${id}`,
+    url: API.JOB_DETAIL(id),
     method: 'get'
   })
 }
 
 export function toggleJobStatus(id) {
   return request({
-    url: `/api/jobs/${id}/toggle-status`,
+    url: API.JOB_TOGGLE(id),
     method: 'post'
   })
 }

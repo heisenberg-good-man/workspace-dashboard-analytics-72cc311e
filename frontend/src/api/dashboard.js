@@ -1,8 +1,10 @@
-import request from '@/utils/request'
+import request, { withMock } from '@/utils/request'
+import { API } from '@/utils/apiConfig'
+import { getMockDashboardStats } from '@/utils/mockData'
 
 export function getDashboardStats() {
-  return request({
-    url: '/api/dashboard',
-    method: 'get'
-  })
+  return withMock(
+    () => request({ url: API.DASHBOARD, method: 'get' }),
+    getMockDashboardStats
+  )
 }

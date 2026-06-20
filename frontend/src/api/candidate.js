@@ -1,30 +1,35 @@
-import request from '@/utils/request'
+import request, { withMock } from '@/utils/request'
+import { API } from '@/utils/apiConfig'
+import { getMockCandidates } from '@/utils/mockData'
 
 export function queryCandidates(params) {
-  return request({
-    url: '/api/candidates/query',
-    method: 'post',
-    data: params
-  })
+  return withMock(
+    () => request({
+      url: API.CANDIDATES_QUERY,
+      method: 'post',
+      data: params
+    }),
+    () => getMockCandidates()
+  )
 }
 
 export function listCandidates() {
-  return request({
-    url: '/api/candidates',
-    method: 'get'
-  })
+  return withMock(
+    () => request({ url: API.CANDIDATES_LIST, method: 'get' }),
+    () => getMockCandidates().list
+  )
 }
 
 export function getCandidate(id) {
   return request({
-    url: `/api/candidates/${id}`,
+    url: API.CANDIDATE_DETAIL(id),
     method: 'get'
   })
 }
 
 export function passCandidate(data) {
   return request({
-    url: '/api/candidates/pass',
+    url: API.CANDIDATE_PASS,
     method: 'post',
     data: data
   })
@@ -32,7 +37,7 @@ export function passCandidate(data) {
 
 export function rejectCandidate(data) {
   return request({
-    url: '/api/candidates/reject',
+    url: API.CANDIDATE_REJECT,
     method: 'post',
     data: data
   })

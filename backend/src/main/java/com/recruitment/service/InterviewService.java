@@ -49,6 +49,7 @@ public class InterviewService {
         interview.setJobTitle(jobTitle);
         interview.setInterviewTime(dto.getInterviewTime());
         interview.setInterviewer(dto.getInterviewer());
+        interview.setStatus(Interview.InterviewStatus.SCHEDULED);
 
         if (dto.getInterviewMethod() != null) {
             try {
@@ -70,9 +71,56 @@ public class InterviewService {
         return interview;
     }
 
+    public Interview completeInterview(Long id) {
+        Interview interview = storage.interviews.get(id);
+        if (interview == null) {
+            return null;
+        }
+        if (interview.getStatus() != Interview.InterviewStatus.SCHEDULED) {
+            throw new IllegalStateException("当前状态不允许完成面试");
+        }
+        interview.setStatus(Interview.InterviewStatus.COMPLETED);
+
+        Candidate c = storage.candidates.get(interview.getCandidateId());
+        if (c != null && c.getResumeStatus() == Candidate.ResumeStatus.INTERVIEW_SCHEDULED) {
+            c.setResumeStatus(Candidate.ResumeStatus.INTERVIEWED);
+            Candidate.FollowRecord record = new Candidate.FollowRecord();
+            record.setDate(java.time.LocalDate.now());
+            record.setOperator(interview.getInterviewer() != null ? interview.getInterviewer() : "系统");
+            record.setContent("已完成面试");
+            c.getFollowRecords().add(record);
+        }
+
+        return interview;
+    }
+
+    public Interview cancelInterview(Long id) {
+        Interview interview = storage.interviews.get(id);
+        if (interview == null) {
+            return null;
+        }
+        if (interview.getStatus() != Interview.InterviewStatus.SCHEDULED) {
+            throw new IllegalStateException("当前状态不允许取消面试");
+        }
+        interview.setStatus(Interview.InterviewStatus.CANCELLED);
+
+        Candidate c = storage.candidates.get(interview.getCandidateId());
+        if (c != null && c.getResumeStatus() == Candidate.ResumeStatus.INTERVIEW_SCHEDULED) {
+            c.setResumeStatus(Candidate.ResumeStatus.PASSED);
+            Candidate.FollowRecord record = new Candidate.FollowRecord();
+            record.setDate(java.time.LocalDate.now());
+            record.setOperator("系统");
+            record.setContent("面试已取消，状态回退至初筛通过");
+            c.getFollowRecords().add(record);
+        }
+
+        return interview;
+    }
+
     public List<Interview> listInterviews() {
         return storage.interviewList.stream()
-                .sorted(Comparator.comparing(Interview::getInterviewTime).reversed())
+                .sorted(Comparator.comparing(Interview::getInterviewTime,
+                        Comparator.nullsLast(Comparator.reverseOrder())))
                 .collect(Collectors.toList());
     }
 

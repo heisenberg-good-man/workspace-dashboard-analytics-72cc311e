@@ -2,8 +2,17 @@
   <div class="page-container">
     <div class="page-header">
       <h2 class="page-title">数据看板</h2>
-      <el-button type="primary" :icon="Refresh" @click="loadStats">刷新数据</el-button>
+      <el-button type="primary" :icon="Refresh" @click="loadStats" :loading="loading">刷新数据</el-button>
     </div>
+
+    <el-alert
+      v-if="loadError"
+      title="数据加载失败，当前显示本地兜底数据"
+      type="warning"
+      show-icon
+      :closable="true"
+      style="margin-bottom: 16px;"
+    />
 
     <div class="four-col-layout" style="margin-bottom: 20px;">
       <div class="metric-card">
@@ -31,29 +40,42 @@
     <div class="two-col-layout">
       <div class="card">
         <div class="section-title" style="margin-bottom: 16px;">简历状态分布</div>
-        <div ref="statusChartRef" style="width: 100%; height: 320px;"></div>
+        <div v-if="hasChartData" ref="statusChartRef" style="width: 100%; height: 320px;"></div>
+        <el-empty v-else description="暂无状态分布数据" :image-size="80" />
       </div>
       <div class="card">
         <div class="section-title" style="margin-bottom: 16px;">各职位简历数</div>
-        <div ref="jobChartRef" style="width: 100%; height: 320px;"></div>
+        <div v-if="hasJobChartData" ref="jobChartRef" style="width: 100%; height: 320px;"></div>
+        <el-empty v-else description="暂无职位简历数据" :image-size="80" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, watch } from 'vue'
+import { ref, onMounted, onActivated, nextTick, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Refresh, Briefcase, Document, Calendar, UserFilled } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 import { getDashboardStats } from '@/api/dashboard'
-import { RESUME_STATUS_MAP } from '@/utils/constants'
 
 const stats = ref(null)
+const loading = ref(false)
+const loadError = ref(false)
 const statusChartRef = ref(null)
 const jobChartRef = ref(null)
 let statusChart = null
 let jobChart = null
+
+const hasChartData = computed(() => {
+  if (!stats.value?.resumeStatusDistribution) return false
+  return Object.values(stats.value.resumeStatusDistribution).some(v => v > 0)
+})
+
+const hasJobChartData = computed(() => {
+  if (!stats.value?.jobResumeCounts) return false
+  return stats.value.jobResumeCounts.length > 0
+})
 
 const STATUS_LABEL = {
   PENDING: '待筛选',
@@ -66,30 +88,39 @@ const STATUS_LABEL = {
 }
 
 async function loadStats() {
+  loading.value = true
+  loadError.value = false
   try {
     const res = await getDashboardStats()
     if (res.code === 200) {
       stats.value = res.data
+      if (res.message && res.message.includes('mock')) {
+        loadError.value = true
+      }
       await nextTick()
       renderCharts()
     } else {
       ElMessage.error(res.message || '加载数据失败')
+      loadError.value = true
     }
   } catch (e) {
     console.error(e)
+    loadError.value = true
+  } finally {
+    loading.value = false
   }
 }
 
 function renderCharts() {
   if (!stats.value) return
 
-  if (statusChartRef.value) {
+  if (statusChartRef.value && hasChartData.value) {
     if (!statusChart) statusChart = echarts.init(statusChartRef.value)
     const data = stats.value.resumeStatusDistribution || {}
     const chartData = Object.keys(data).map(k => ({
       name: STATUS_LABEL[k] || k,
       value: data[k]
-    }))
+    })).filter(d => d.value > 0)
     statusChart.setOption({
       tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
       legend: { bottom: 0, type: 'scroll' },
@@ -105,7 +136,7 @@ function renderCharts() {
     })
   }
 
-  if (jobChartRef.value) {
+  if (jobChartRef.value && hasJobChartData.value) {
     if (!jobChart) jobChart = echarts.init(jobChartRef.value)
     const data = stats.value.jobResumeCounts || []
     jobChart.setOption({
@@ -141,5 +172,9 @@ function handleResize() {
 onMounted(() => {
   loadStats()
   window.addEventListener('resize', handleResize)
+})
+
+onActivated(() => {
+  loadStats()
 })
 </script>

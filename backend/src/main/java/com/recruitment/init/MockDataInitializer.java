@@ -1,5 +1,6 @@
 package com.recruitment.init;
 
+import com.recruitment.model.Interview;
 import com.recruitment.model.Job;
 import com.recruitment.model.Candidate;
 import com.recruitment.storage.InMemoryStorage;
@@ -23,6 +24,7 @@ public class MockDataInitializer {
     public void init() {
         initJobs();
         initCandidates();
+        initInterviews();
     }
 
     private void initJobs() {
@@ -124,7 +126,7 @@ public class MockDataInitializer {
 
         Candidate c10 = createCandidate(10L, "郑雪", "女", 26, "13800138010", "zhengxue@email.com",
                 "硕士", "3年产品经理经验，C端产品背景", "3", "产品经理",
-                Candidate.ResumeStatus.PENDING, 4, null, LocalDate.now().minusDays(1).plusHours(0).toLocalDate(),
+                Candidate.ResumeStatus.PENDING, 4, null, LocalDate.now().minusDays(1),
                 Arrays.asList(new Candidate.FollowRecord(LocalDate.now().minusDays(1), "系统", "投递简历")));
 
         Candidate c11 = createCandidate(11L, "黄磊", "男", 28, "13800138011", "huanglei@email.com",
@@ -192,5 +194,54 @@ public class MockDataInitializer {
         c.setApplyDate(applyDate);
         c.setFollowRecords(new java.util.ArrayList<>(records));
         return c;
+    }
+
+    private void initInterviews() {
+        Interview i1 = new Interview();
+        i1.setId(1L);
+        i1.setCandidateId(3L);
+        i1.setCandidateName("刘强");
+        i1.setJobId(3L);
+        i1.setJobTitle("产品经理");
+        i1.setInterviewTime(LocalDateTime.now().plusDays(2).withHour(10).withMinute(0));
+        i1.setInterviewer("王五");
+        i1.setInterviewMethod(Interview.InterviewMethod.ONSITE);
+        i1.setLocationOrLink("北京总部3楼会议室A");
+        i1.setNotes("B端产品经验丰富，重点考察产品思维");
+        i1.setStatus(Interview.InterviewStatus.SCHEDULED);
+
+        Interview i2 = new Interview();
+        i2.setId(2L);
+        i2.setCandidateId(7L);
+        i2.setCandidateName("孙浩");
+        i2.setJobId(1L);
+        i2.setJobTitle("高级Java开发工程师");
+        i2.setInterviewTime(LocalDateTime.now().minusDays(3).withHour(14).withMinute(0));
+        i2.setInterviewer("张三");
+        i2.setInterviewMethod(Interview.InterviewMethod.ONLINE);
+        i2.setLocationOrLink("https://meeting.example.com/room/123");
+        i2.setNotes("微服务架构经验丰富");
+        i2.setStatus(Interview.InterviewStatus.COMPLETED);
+
+        Interview i3 = new Interview();
+        i3.setId(3L);
+        i3.setCandidateId(9L);
+        i3.setCandidateName("吴迪");
+        i3.setJobId(1L);
+        i3.setJobTitle("高级Java开发工程师");
+        i3.setInterviewTime(LocalDateTime.now().minusDays(7).withHour(10).withMinute(0));
+        i3.setInterviewer("张三");
+        i3.setInterviewMethod(Interview.InterviewMethod.ONSITE);
+        i3.setLocationOrLink("北京总部5楼会议室B");
+        i3.setNotes("团队管理经验，技术深度好");
+        i3.setStatus(Interview.InterviewStatus.COMPLETED);
+
+        Arrays.asList(i1, i2, i3).forEach(i -> {
+            storage.interviews.put(i.getId(), i);
+            storage.interviewList.add(i);
+            if (i.getId() > storage.interviewIdSeq.get()) {
+                storage.interviewIdSeq.set(i.getId());
+            }
+        });
     }
 }

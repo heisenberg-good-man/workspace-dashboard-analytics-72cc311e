@@ -19,8 +19,13 @@ public class Interview {
     private InterviewMethod interviewMethod;
     private String locationOrLink;
     private String notes;
+    private InterviewStatus status;
 
     public enum InterviewMethod {
         ONSITE, ONLINE, PHONE
+    }
+
+    public enum InterviewStatus {
+        SCHEDULED, COMPLETED, CANCELLED
     }
 }
