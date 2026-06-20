@@ -1,6 +1,9 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { API_BASE_URL } from '@/utils/apiConfig'
+import { ref } from 'vue'
+
+export const usingMockData = ref(false)
 
 const request = axios.create({
   baseURL: API_BASE_URL || '/',
@@ -44,6 +47,7 @@ request.interceptors.response.use(
 export function withMock(apiCall, mockFn) {
   return apiCall().catch(err => {
     console.warn('[Mock Fallback] API请求失败，使用本地兜底数据:', err.message)
+    usingMockData.value = true
     const mockData = mockFn()
     return { code: 200, message: 'success (mock)', data: mockData }
   })

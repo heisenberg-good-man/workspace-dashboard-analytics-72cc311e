@@ -1,6 +1,6 @@
 import request, { withMock } from '@/utils/request'
 import { API } from '@/utils/apiConfig'
-import { getMockJobs, getMockOpenJobs, getMockCandidates } from '@/utils/mockData'
+import { getMockJobs, getMockOpenJobs, mockToggleJobStatus, getMockCandidates } from '@/utils/mockData'
 
 export function listJobs() {
   return withMock(
@@ -17,15 +17,24 @@ export function listOpenJobs() {
 }
 
 export function getJob(id) {
-  return request({
-    url: API.JOB_DETAIL(id),
-    method: 'get'
-  })
+  return withMock(
+    () => request({
+      url: API.JOB_DETAIL(id),
+      method: 'get'
+    }),
+    () => {
+      const jobs = getMockJobs()
+      return jobs.find(j => j.id === Number(id)) || null
+    }
+  )
 }
 
 export function toggleJobStatus(id) {
-  return request({
-    url: API.JOB_TOGGLE(id),
-    method: 'post'
-  })
+  return withMock(
+    () => request({
+      url: API.JOB_TOGGLE(id),
+      method: 'post'
+    }),
+    () => mockToggleJobStatus(id)
+  )
 }

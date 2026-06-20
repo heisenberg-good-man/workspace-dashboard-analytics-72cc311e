@@ -1,6 +1,6 @@
 import request, { withMock } from '@/utils/request'
 import { API } from '@/utils/apiConfig'
-import { getMockInterviews } from '@/utils/mockData'
+import { getMockInterviews, mockCreateInterview, mockCompleteInterview, mockCancelInterview } from '@/utils/mockData'
 
 export function listInterviews() {
   return withMock(
@@ -10,37 +10,58 @@ export function listInterviews() {
 }
 
 export function getInterview(id) {
-  return request({
-    url: API.INTERVIEW_DETAIL(id),
-    method: 'get'
-  })
+  return withMock(
+    () => request({
+      url: API.INTERVIEW_DETAIL(id),
+      method: 'get'
+    }),
+    () => {
+      const list = getMockInterviews()
+      return list.find(i => i.id === Number(id)) || null
+    }
+  )
 }
 
 export function createInterview(data) {
-  return request({
-    url: API.INTERVIEWS,
-    method: 'post',
-    data: data
-  })
+  return withMock(
+    () => request({
+      url: API.INTERVIEWS,
+      method: 'post',
+      data: data
+    }),
+    () => mockCreateInterview(data)
+  )
 }
 
 export function completeInterview(id) {
-  return request({
-    url: API.INTERVIEW_COMPLETE(id),
-    method: 'post'
-  })
+  return withMock(
+    () => request({
+      url: API.INTERVIEW_COMPLETE(id),
+      method: 'post'
+    }),
+    () => mockCompleteInterview(id)
+  )
 }
 
 export function cancelInterview(id) {
-  return request({
-    url: API.INTERVIEW_CANCEL(id),
-    method: 'post'
-  })
+  return withMock(
+    () => request({
+      url: API.INTERVIEW_CANCEL(id),
+      method: 'post'
+    }),
+    () => mockCancelInterview(id)
+  )
 }
 
 export function listInterviewsByCandidate(candidateId) {
-  return request({
-    url: API.INTERVIEWS_BY_CANDIDATE(candidateId),
-    method: 'get'
-  })
+  return withMock(
+    () => request({
+      url: API.INTERVIEWS_BY_CANDIDATE(candidateId),
+      method: 'get'
+    }),
+    () => {
+      const list = getMockInterviews()
+      return list.filter(i => i.candidateId === Number(candidateId))
+    }
+  )
 }

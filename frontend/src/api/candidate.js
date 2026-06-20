@@ -1,6 +1,6 @@
 import request, { withMock } from '@/utils/request'
 import { API } from '@/utils/apiConfig'
-import { getMockCandidates } from '@/utils/mockData'
+import { getMockCandidates, getMockCandidate, mockPassCandidate, mockRejectCandidate } from '@/utils/mockData'
 
 export function queryCandidates(params) {
   return withMock(
@@ -9,7 +9,7 @@ export function queryCandidates(params) {
       method: 'post',
       data: params
     }),
-    () => getMockCandidates()
+    () => getMockCandidates(params)
   )
 }
 
@@ -21,24 +21,33 @@ export function listCandidates() {
 }
 
 export function getCandidate(id) {
-  return request({
-    url: API.CANDIDATE_DETAIL(id),
-    method: 'get'
-  })
+  return withMock(
+    () => request({
+      url: API.CANDIDATE_DETAIL(id),
+      method: 'get'
+    }),
+    () => getMockCandidate(id)
+  )
 }
 
 export function passCandidate(data) {
-  return request({
-    url: API.CANDIDATE_PASS,
-    method: 'post',
-    data: data
-  })
+  return withMock(
+    () => request({
+      url: API.CANDIDATE_PASS,
+      method: 'post',
+      data: data
+    }),
+    () => mockPassCandidate(data)
+  )
 }
 
 export function rejectCandidate(data) {
-  return request({
-    url: API.CANDIDATE_REJECT,
-    method: 'post',
-    data: data
-  })
+  return withMock(
+    () => request({
+      url: API.CANDIDATE_REJECT,
+      method: 'post',
+      data: data
+    }),
+    () => mockRejectCandidate(data)
+  )
 }

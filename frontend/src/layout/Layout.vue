@@ -28,6 +28,14 @@
       <el-header class="header">
         <div class="header-left">
           <span class="breadcrumb-title">{{ currentTitle }}</span>
+          <el-alert
+            v-if="usingMockData"
+            title="当前使用本地兜底数据（后端服务未连接）"
+            type="warning"
+            :closable="false"
+            show-icon
+            class="mock-alert"
+          />
         </div>
         <div class="header-right">
           <el-avatar :size="32" style="background-color: #409eff;">管</el-avatar>
@@ -49,6 +57,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { usingMockData } from '@/utils/request'
 
 const route = useRoute()
 const sidebarWidth = '220px'
@@ -116,10 +125,21 @@ const currentTitle = computed(() => route.meta.title || '')
   padding: 0 24px;
 }
 
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .header-left .breadcrumb-title {
   font-size: 16px;
   font-weight: 600;
   color: #303133;
+}
+
+.mock-alert {
+  --el-alert-padding: 4px 12px;
+  height: 28px;
 }
 
 .header-right {

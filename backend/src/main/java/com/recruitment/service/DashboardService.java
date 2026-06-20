@@ -2,6 +2,7 @@ package com.recruitment.service;
 
 import com.recruitment.model.Candidate;
 import com.recruitment.model.DashboardStats;
+import com.recruitment.model.Interview;
 import com.recruitment.model.Job;
 import com.recruitment.storage.InMemoryStorage;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,7 @@ public class DashboardService {
         stats.setPendingResumes(pendingResumes);
 
         long scheduledInterviews = storage.interviewList.stream()
-                .filter(i -> i.getInterviewTime() != null)
+                .filter(i -> i.getStatus() == Interview.InterviewStatus.SCHEDULED)
                 .count();
         stats.setScheduledInterviews(scheduledInterviews);
 
